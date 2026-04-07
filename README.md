@@ -39,7 +39,7 @@ Use **Workers & Pages > Create > Pages > Direct Upload** or Git integration.
 - `REMOVEBG_API_KEY`
 
 ## Recommended test values
-
+Update env variables
 Cloudflare provides public Turnstile test keys for development:
 
 - Site key: `1x00000000000000000000AA`
