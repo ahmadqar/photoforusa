@@ -20,7 +20,7 @@ A Cloudflare Pages + Functions starter for a monetizable U.S. green card / visa-
 
 This starter includes major languages, not every world language. The architecture is ready to add more by extending `js/translations.js`.
 
-## Cloudflare deployment
+## Cloudflare deployment.
 
 Use **Workers & Pages > Create > Pages > Direct Upload** or Git integration.
 
