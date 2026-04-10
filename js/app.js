@@ -69,8 +69,8 @@ async function bootstrap() {
   syncSessionUI();
 
   initLemonSqueezy();
-
-  if (successOrderId && window.location.pathname.endsWith('/success.html')) {
+  
+  if (successOrderId && (window.location.pathname.endsWith('/success.html') || window.location.pathname.endsWith('/success'))){
     await handleSuccessPage(successOrderId);
   }
 }
