@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PhotoForUSA | AI U.S. Green Card & Visa Photo Tool</title>
+  <meta name="description" content="Create U.S. green card and visa-style photos with AI-guided crop, human verification, premium background cleanup, and fast 600×600 export." />
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+  <meta name="theme-color" content="#07112c" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="PhotoForUSA | AI U.S. Green Card & Visa Photo Tool" />
+  <meta property="og:description" content="Create compliant-looking visa and green card photos with fast AI crop, premium white background cleanup, and 600×600 export." />
+  <meta property="og:image" content="/assets/og-card.svg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="PhotoForUSA | AI U.S. Green Card & Visa Photo Tool" />
+  <meta name="twitter:description" content="Create compliant-looking visa and green card photos with fast AI crop, premium white background cleanup, and 600×600 export." />
+  <meta name="twitter:image" content="/assets/og-card.svg" />
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="stylesheet" href="/css/main.css?v=editor-first-20260411-1" />
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <script src="https://app.lemonsqueezy.com/js/lemon.js" defer></script>
+  <link rel="canonical" href="https://PhotoForUSA.com/" />
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"WebApplication",
+    "name":"PhotoForUSA",
+    "applicationCategory":"PhotoEditorApplication",
+    "operatingSystem":"Any",
+    "url":"https://PhotoForUSA.com/",
+    "offers":{"@type":"Offer","price":"4.99","priceCurrency":"USD","description":"Premium background cleanup and ad-free session"}
+  }
+  </script>
+</head>
+<body>
+  <div class="page-shell editor-first-shell">
+    <header class="topbar container">
+      <div class="topbar-inner compact-topbar">
+        <a class="brand" href="/" aria-label="PhotoForUSA">
+          <div class="brand-copy">
+            <strong>PhotoForUSA</strong>
+            <span data-i18n="brandTag">AI-assisted visa and green card photo editor</span>
+          </div>
+          <img src="/assets/logo.svg" alt="PhotoForUSA logo" />
+        </a>
+
+        <nav class="nav-links" aria-label="Primary">
+          <a href="#editor" data-i18n="navEditor">Editor</a>
+          <a href="#pricing" data-i18n="navPricing">Pricing</a>
+          <a href="#faq" data-i18n="navFaq">FAQ</a>
+        </nav>
+
+        <div class="topbar-actions">
+          <button id="themeToggle" class="ghost-btn" type="button">Theme</button>
+          <label class="sr-only" for="languageSelect">Language</label>
+          <select id="languageSelect"></select>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="section container hero hero-editor-first">
+        <div class="hero-copy hero-copy-narrow center-copy">
+          <span class="eyebrow" data-i18n="eyebrow">Fast crop · 600×600 export · premium cleanup</span>
+          <h1 data-i18n="heroTitle">Create U.S. green card and visa-style photos with AI</h1>
+          <p class="lead" data-i18n="heroLead">Upload your photo, verify you are human, run AI crop guidance, and export the final 600×600 image in a few steps.</p>
+          <div class="hero-actions center-actions compact-hero-actions">
+            <a href="#editor" class="primary-btn" data-i18n="ctaStart">Open editor</a>
+            <a href="#pricing" class="secondary-btn" data-i18n="ctaPricing">See premium</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="editor" class="section container editor-section">
+        <div class="editor-shell glass-card">
+          <div class="editor-shell-head">
+            <div>
+              <span class="eyebrow small-eyebrow" data-i18n="navEditor">Editor</span>
+              <h2 data-i18n="editorTitle">Photo editor and compliance check</h2>
+              <p class="editor-subtitle" data-i18n="editorSubtitle">Start with upload and verification, then analyze, adjust, and export.</p>
+            </div>
+            <div class="editor-steps">
+              <span class="editor-step active">1</span>
+              <span class="editor-step">2</span>
+              <span class="editor-step">3</span>
+            </div>
+          </div>
+
+          <div class="editor-grid">
+            <section class="preview-workspace">
+              <div class="workspace-cards">
+                <article class="workspace-card preview-panel">
+                  <h3 data-i18n="previewOriginal">Original upload</h3>
+                  <div class="preview-box editor-preview-box">
+                    <img id="originalPreview" alt="Original preview" />
+                  </div>
+                </article>
+
+                <article class="workspace-card preview-panel">
+                  <h3 data-i18n="previewEdited">Export preview</h3>
+                  <div class="preview-box editor-preview-box">
+                    <canvas id="previewCanvas" width="600" height="600" aria-label="Edited preview"></canvas>
+                  </div>
+                </article>
+              </div>
+
+              <div id="analysisSummary" class="analysis-summary clean-summary" data-i18n="analysisPlaceholder">Upload a portrait, verify the user, then run AI analysis.</div>
+
+              <div class="results-grid editor-results">
+                <article class="check-card compact-card">
+                  <h3 data-i18n="checksTitle">Checks</h3>
+                  <ul id="checksList"></ul>
+                </article>
+                <article class="check-card compact-card">
+                  <h3 data-i18n="factsTitle">Export facts</h3>
+                  <ul id="exportFactsList"></ul>
+                </article>
+              </div>
+            </section>
+
+            <aside class="control-column editor-sidebar">
+              <div class="field-stack upload-card">
+                <label class="field-label" for="photoInput" data-i18n="uploadLabel">Upload portrait</label>
+                <input id="photoInput" type="file" accept="image/jpeg,image/png,image/webp" />
+                <div class="hint" data-i18n="uploadHint">Best results: one face, even lighting, neutral expression, plain background.</div>
+              </div>
+
+              <div class="field-stack verify-card">
+                <label class="field-label" data-i18n="humanLabel">Human verification</label>
+                <div class="turnstile-wrap"><div id="turnstileWidget"></div></div>
+                <button id="verifyHumanBtn" class="secondary-btn block-btn" type="button" data-i18n="humanBtn">Verify and unlock editing</button>
+                <div id="humanStatus" class="status-line warn" data-i18n="humanPending">Waiting for verification.</div>
+              </div>
+
+              <div class="field-stack slider-card">
+                <label class="field-label" for="zoomRange" data-i18n="zoom">Zoom</label>
+                <input id="zoomRange" type="range" min="0.8" max="1.25" step="0.01" value="1" />
+              </div>
+              <div class="field-stack slider-card">
+                <label class="field-label" for="offsetXRange" data-i18n="offsetX">Move left / right</label>
+                <input id="offsetXRange" type="range" min="-0.2" max="0.2" step="0.005" value="0" />
+              </div>
+              <div class="field-stack slider-card">
+                <label class="field-label" for="offsetYRange" data-i18n="offsetY">Move up / down</label>
+                <input id="offsetYRange" type="range" min="-0.2" max="0.2" step="0.005" value="0" />
+              </div>
+
+              <div class="action-stack editor-actions">
+                <button id="analyzeBtn" class="primary-btn block-btn large-btn" type="button" data-i18n="analyze">Analyze and auto-crop</button>
+                <button id="removeBgBtn" class="premium-btn block-btn large-btn" type="button" data-i18n="removeBg">Premium: remove background</button>
+                <button id="exportBtn" class="secondary-btn block-btn large-btn" type="button" data-i18n="export">Export JPEG</button>
+              </div>
+
+              <div class="note tight-note" data-i18n="privacyNote">Crop analysis runs in the browser. Premium background cleanup also runs in the browser and keeps the image on the visitor device.</div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section id="pricing" class="section container pricing-section-simple">
+        <div class="section-head centered-head compact-head">
+          <span class="eyebrow small-eyebrow" data-i18n="pricingEyebrow">Plans</span>
+          <h2 data-i18n="pricingTitle">Free and premium plans</h2>
+          <p class="section-copy">Start free, then unlock premium cleanup only if you need the cleaner result.</p>
+        </div>
+
+        <div class="pricing-grid simple-pricing-grid">
+          <article class="pricing-card free-spotlight simple-plan">
+            <h3 data-i18n="freePlan">Free</h3>
+            <p data-i18n="freeDesc">Best for first-time users and ad-supported traffic.</p>
+            <div class="price" data-i18n="freePrice">$0</div>
+            <ul class="pricing-list">
+              <li data-i18n="free1">Upload, AI crop, manual adjust, JPEG export</li>
+              <li data-i18n="free2">Human verification</li>
+              <li data-i18n="free3">Ad-supported experience</li>
+              <li data-i18n="free4">No background removal</li>
+            </ul>
+          </article>
+
+          <article class="pricing-card featured premium-spotlight simple-plan">
+            <img id="premiumBadge" class="premium-corner hidden" src="/assets/premium-badge.svg" alt="Premium active" />
+            <span class="ribbon" data-i18n="mostPopular">Most popular</span>
+            <h3 data-i18n="proPlan">Premium</h3>
+            <p data-i18n="proDesc">Best for removing background and getting a cleaner final result.</p>
+            <div class="price" data-i18n="proPrice">$4.99</div>
+            <div class="price-sub" data-i18n="proSub">one-time access package</div>
+            <ul class="pricing-list">
+              <li data-i18n="pro1">Premium background removal</li>
+              <li data-i18n="pro2">Ad-free session</li>
+              <li data-i18n="pro3">Priority premium badge and session cookie</li>
+              <li data-i18n="pro4">Lemon Squeezy Checkout flow</li>
+            </ul>
+            <div class="field-stack pricing-actions">
+              <button id="checkoutBtn" class="premium-btn block-btn large-btn" type="button" data-i18n="buyPremium">Buy premium now</button>
+              <div id="checkoutStatus" class="muted centered-copy-text" data-i18n="checkoutIdle">Secure checkout opens in a Lemon Squeezy overlay or hosted checkout.</div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="faq" class="section container faq-section slim-faq-section">
+        <div class="section-head centered-head compact-head">
+          <span class="eyebrow small-eyebrow" data-i18n="faqEyebrow">Questions</span>
+          <h2 data-i18n="faqTitle">FAQ</h2>
+        </div>
+        <div class="faq-grid slim-faq-grid">
+          <article class="faq-card">
+            <div class="faq-item"><strong data-i18n="faq1q">Does the app guarantee embassy acceptance?</strong><p data-i18n="faq1a">No. It provides AI-assisted crop and formatting guidance only. The final decision belongs to the reviewing authority.</p></div>
+            <div class="faq-item"><strong data-i18n="faq2q">Why is Turnstile included?</strong><p data-i18n="faq2a">It reduces bot abuse on uploads, background-removal calls, and checkout flows.</p></div>
+          </article>
+          <article class="faq-card">
+            <div class="faq-item"><strong data-i18n="faq3q">Can I use AdSense?</strong><p data-i18n="faq3a">Yes. The placeholders are ready for your ad code, subject to your policy compliance.</p></div>
+            <div class="faq-item"><strong data-i18n="faq4q">How do paid features work?</strong><p data-i18n="faq4a">After a successful Lemon Squeezy Checkout session, the site activates a signed premium cookie and unlocks premium-only actions.</p></div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer clean-footer">
+      <div class="container footer-grid clean-footer-grid">
+        <section class="glass-card footer-card">
+          <h3 data-i18n="footerAbout">About</h3>
+          <p data-i18n="footerText">PhotoForUSA is a simple tool for preparing visa and green card style photos with AI-assisted crop and premium cleanup.</p>
+        </section>
+        <section class="glass-card footer-card">
+          <h3 data-i18n="footerLinks">Links</h3>
+          <ul>
+            <li><a href="#editor">Editor</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+            <li><a href="#faq">FAQ</a></li>
+          </ul>
+        </section>
+        <section class="glass-card footer-card">
+          <h3 data-i18n="footerLegal">Legal</h3>
+          <ul>
+            <li><a href="/privacy.html">Privacy Policy</a></li>
+            <li><a href="/terms.html">Terms of Use</a></li>
+          </ul>
+        </section>
+      </div>
+    </footer>
+  </div>
+  <script type="module" src="/js/app.js?v=editor-first-20260411-1"></script>
+</body>
+</html>
