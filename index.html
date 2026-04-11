@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PhotoForUSA | أداة صورة الجرين كارد والتأشيرة الأمريكية</title>
+  <meta name="description" content="أداة تساعدك على تجهيز صورة الجرين كارد والتأشيرة الأمريكية مع قص ذكي وتصدير 600×600 وتنظيف خلفية للنسخة المدفوعة." />
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+  <meta name="theme-color" content="#0a1020" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="PhotoForUSA | أداة صورة الجرين كارد والتأشيرة الأمريكية" />
+  <meta property="og:description" content="قص ذكي، فحص أولي، وتصدير 600×600 مع تنظيف خلفية للنسخة المدفوعة." />
+  <meta property="og:image" content="/assets/og-card.svg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="PhotoForUSA | أداة صورة الجرين كارد والتأشيرة الأمريكية" />
+  <meta name="twitter:description" content="قص ذكي، فحص أولي، وتصدير 600×600 مع تنظيف خلفية للنسخة المدفوعة." />
+  <meta name="twitter:image" content="/assets/og-card.svg" />
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="stylesheet" href="/css/main.css?v=apple-final-20260411-2" />
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <script src="https://app.lemonsqueezy.com/js/lemon.js" defer></script>
+  <link rel="canonical" href="https://PhotoForUSA.com/" />
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar container">
+      <div class="topbar-inner topbar-minimal">
+        <div class="topbar-actions">
+          <button id="themeToggle" class="ghost-btn" type="button" data-i18n="themeLabel">المظهر</button>
+          <label class="sr-only" for="languageSelect">Language</label>
+          <select id="languageSelect"></select>
+        </div>
+
+        <nav class="nav-links" aria-label="Primary">
+          <a href="#editor" data-i18n="navEditor">الأداة</a>
+          <a href="#pricing" data-i18n="navPricing">الاشتراكات</a>
+          <a href="#faq" data-i18n="navFaq">الأسئلة</a>
+        </nav>
+
+        <a class="brand" href="/" aria-label="PhotoForUSA">
+          <div class="brand-copy">
+            <strong>PhotoForUSA</strong>
+            <span data-i18n="brandTag">أداة صور الجرين كارد والتأشيرة الأمريكية</span>
+          </div>
+          <img src="/assets/logo.svg" alt="PhotoForUSA logo" />
+        </a>
+      </div>
+    </header>
+
+    <main>
+      <section class="section container hero hero-apple-lite">
+        <div class="hero-copy center-copy">
+          <span class="eyebrow" data-i18n="eyebrow">600×600 · قص ذكي · تنظيف خلفية مدفوع</span>
+          <h1 data-i18n="heroTitle">أنشئ صورة الجرين كارد والتأشيرة الأمريكية</h1>
+          <p class="lead" data-i18n="heroLeadShort">ارفع الصورة، تحقّق منها، ثم صدّرها بالمقاس المناسب خلال دقائق.</p>
+          <div class="hero-actions center-actions">
+            <a href="#editor" class="primary-btn" data-i18n="ctaStart">افتح الأداة</a>
+            <a href="#pricing" class="secondary-btn" data-i18n="ctaPricing">شاهد النسخة المدفوعة</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="container ad-row ad-row-top">
+        <div class="ad-slot ad-slot--banner" id="ad-hero-top">
+          <strong data-i18n="adTopTitle">مساحة إعلانية</strong>
+          <small data-i18n="adTopHint">مكان جاهز لإعلان علوي متجاوب</small>
+        </div>
+      </section>
+
+      <section id="editor" class="section container editor-section compact-layout">
+        <div class="editor-shell glass-card">
+          <div class="section-head compact-head editor-heading">
+            <div>
+              <span class="eyebrow small-eyebrow" data-i18n="navEditor">الأداة</span>
+              <h2 data-i18n="editorTitle">محرر الصورة وفحص التوافق</h2>
+              <p class="section-copy" data-i18n="editorSubtitleShort">ابدأ برفع الصورة والتحقق، ثم حلّلها وعدّلها وصدّرها من مكان واحد.</p>
+            </div>
+          </div>
+
+          <div class="editor-grid editor-grid-apple">
+            <section class="editor-main-panel">
+              <div class="preview-grid">
+                <article class="preview-card">
+                  <h3 data-i18n="previewOriginal">الصورة الأصلية</h3>
+                  <div class="preview-box clean-preview-box">
+                    <img id="originalPreview" alt="Original preview" />
+                  </div>
+                </article>
+
+                <article class="preview-card">
+                  <h3 data-i18n="previewEdited">معاينة التصدير</h3>
+                  <div class="preview-box clean-preview-box">
+                    <canvas id="previewCanvas" width="600" height="600" aria-label="Edited preview"></canvas>
+                  </div>
+                </article>
+              </div>
+
+              <div id="analysisSummary" class="analysis-summary clean-summary" data-i18n="analysisPlaceholder">ارفع صورة مناسبة، ثم تحقّق من المستخدم وابدأ الفحص.</div>
+
+              <div class="results-grid compact-results-grid">
+                <article class="check-card compact-card">
+                  <h3 data-i18n="checksTitle">الفحوصات</h3>
+                  <ul id="checksList"></ul>
+                </article>
+                <article class="check-card compact-card">
+                  <h3 data-i18n="factsTitle">معلومات التصدير</h3>
+                  <ul id="exportFactsList"></ul>
+                </article>
+              </div>
+            </section>
+
+            <aside class="control-column clean-control-column">
+              <div class="field-stack upload-card">
+                <label class="field-label" for="photoInput" data-i18n="uploadLabel">رفع الصورة</label>
+                <input id="photoInput" type="file" accept="image/jpeg,image/png,image/webp" />
+                <div class="hint" data-i18n="uploadHint">أفضل نتيجة: وجه واحد، إضاءة جيدة، تعبير محايد، وخلفية بسيطة.</div>
+              </div>
+
+              <div class="field-stack verify-card">
+                <label class="field-label" data-i18n="humanLabel">التحقق من المستخدم</label>
+                <div class="turnstile-wrap"><div id="turnstileWidget"></div></div>
+                <button id="verifyHumanBtn" class="secondary-btn block-btn" type="button" data-i18n="humanBtn">تحقق وافتح التحرير</button>
+                <div id="humanStatus" class="status-line warn" data-i18n="humanPending">بانتظار التحقق.</div>
+              </div>
+
+              <div class="slider-stack">
+                <div class="field-stack slider-card">
+                  <label class="field-label" for="zoomRange" data-i18n="zoom">تكبير</label>
+                  <input id="zoomRange" type="range" min="0.8" max="1.25" step="0.01" value="1" />
+                </div>
+                <div class="field-stack slider-card">
+                  <label class="field-label" for="offsetXRange" data-i18n="offsetX">تحريك يمين / يسار</label>
+                  <input id="offsetXRange" type="range" min="-0.2" max="0.2" step="0.005" value="0" />
+                </div>
+                <div class="field-stack slider-card">
+                  <label class="field-label" for="offsetYRange" data-i18n="offsetY">تحريك أعلى / أسفل</label>
+                  <input id="offsetYRange" type="range" min="-0.2" max="0.2" step="0.005" value="0" />
+                </div>
+              </div>
+
+              <div class="action-stack clean-action-stack">
+                <button id="analyzeBtn" class="primary-btn block-btn" type="button" data-i18n="analyze">حلّل واقصص تلقائيًا</button>
+                <button id="removeBgBtn" class="premium-btn block-btn" type="button" data-i18n="removeBg">إزالة الخلفية</button>
+                <button id="exportBtn" class="secondary-btn block-btn" type="button" data-i18n="export">تصدير JPEG</button>
+              </div>
+
+              <div class="note clean-note" data-i18n="privacyNote">التحليل يعمل داخل المتصفح. وإزالة الخلفية في النسخة المدفوعة تعمل أيضًا داخل المتصفح وتبقي الصورة على جهازك.</div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section class="container ad-row ad-row-inline">
+        <div class="ad-slot ad-slot--banner" id="ad-inline-middle">
+          <strong data-i18n="adInlineTitle">مساحة إعلانية</strong>
+          <small data-i18n="adInlineHint">مكان جاهز لإعلان بين الأداة والاشتراكات</small>
+        </div>
+      </section>
+
+      <section id="pricing" class="section container pricing-clean-section compact-layout">
+        <div class="section-head centered-head compact-head">
+          <span class="eyebrow small-eyebrow" data-i18n="pricingEyebrow">الاشتراكات</span>
+          <h2 data-i18n="pricingTitle">اختر الخطة المناسبة</h2>
+          <p class="section-copy" data-i18n="pricingSubtitle">ابدأ مجانًا، ثم فعّل النسخة المدفوعة عند الحاجة إلى إزالة الخلفية.</p>
+        </div>
+
+        <div class="pricing-grid clean-pricing-grid balanced-pricing-grid">
+          <article class="pricing-card simple-plan premium-plan featured">
+            <div class="plan-head-row">
+              <h3 data-i18n="proPlan">مدفوع</h3>
+              <span class="soft-badge" data-i18n="mostPopular">الأكثر اختيارًا</span>
+            </div>
+            <img id="premiumBadge" class="premium-corner hidden" src="/assets/premium-badge.svg" alt="Premium active" />
+            <p data-i18n="proDesc">مناسب لتنظيف الخلفية وإخفاء الإعلانات.</p>
+            <div class="price" data-i18n="proPrice">$4.99</div>
+            <div class="price-sub" data-i18n="proSub">دفعة واحدة</div>
+            <ul class="pricing-list">
+              <li data-i18n="pro1">تنظيف ذكي للخلفية البيضاء</li>
+              <li data-i18n="pro2">جلسة بدون إعلانات</li>
+              <li data-i18n="pro3">تفعيل فوري على هذا المتصفح</li>
+            </ul>
+            <div class="field-stack pricing-actions">
+              <button id="checkoutBtn" class="premium-btn block-btn" type="button" data-i18n="buyPremium">اشترك الآن</button>
+              <div id="checkoutStatus" class="muted centered-copy-text" data-i18n="checkoutIdle">يفتح الدفع في نافذة آمنة.</div>
+            </div>
+          </article>
+
+          <article class="pricing-card simple-plan free-plan">
+            <h3 data-i18n="freePlan">مجاني</h3>
+            <p data-i18n="freeDesc">للرفع والقص والتصدير الأساسي.</p>
+            <div class="price" data-i18n="freePrice">$0</div>
+            <ul class="pricing-list">
+              <li data-i18n="free1">رفع الصورة وقصها وتصديرها</li>
+              <li data-i18n="free2">التحقق من المستخدم</li>
+              <li data-i18n="free3">مع الإعلانات</li>
+              <li data-i18n="free4">بدون إزالة خلفية</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section id="faq" class="section container faq-clean-section compact-layout">
+        <div class="section-head centered-head compact-head">
+          <span class="eyebrow small-eyebrow" data-i18n="faqEyebrow">الأسئلة</span>
+          <h2 data-i18n="faqTitle">الأسئلة الشائعة</h2>
+        </div>
+        <div class="faq-clean-list faq-two-only">
+          <article class="faq-card faq-item-card"><strong data-i18n="faq1q">هل يضمن التطبيق قبول الصورة؟</strong><p data-i18n="faq1a">لا. هو يقدم فحصًا أوليًا وإرشادًا للقص، بينما يعود القرار النهائي للجهة الرسمية.</p></article>
+          <article class="faq-card faq-item-card"><strong data-i18n="faq2q">لماذا أُضيف التحقق؟</strong><p data-i18n="faq2a">لتقليل إساءة الاستخدام وحماية الرفع ومسار إزالة الخلفية والدفع.</p></article>
+        </div>
+      </section>
+
+      <section class="container ad-row ad-row-footer">
+        <div class="ad-slot ad-slot--banner" id="ad-footer-slot">
+          <strong data-i18n="adFooterTitle">مساحة إعلانية</strong>
+          <small data-i18n="adFooterHint">مكان جاهز لإعلان سفلي متجاوب</small>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer clean-footer">
+      <div class="container footer-grid clean-footer-grid compact-footer-grid">
+        <section class="glass-card footer-card">
+          <h3 data-i18n="footerAbout">عن الموقع</h3>
+          <p data-i18n="footerTextSimple">PhotoForUSA يساعدك على تجهيز صورة مربعة مناسبة للجرين كارد والتأشيرة مع قص واضح وخيار إزالة الخلفية في النسخة المدفوعة.</p>
+        </section>
+        <section class="glass-card footer-card">
+          <h3 data-i18n="footerLinks">روابط</h3>
+          <ul>
+            <li><a href="#editor" data-i18n="navEditor">الأداة</a></li>
+            <li><a href="#pricing" data-i18n="navPricing">الاشتراكات</a></li>
+            <li><a href="#faq" data-i18n="navFaq">الأسئلة</a></li>
+          </ul>
+        </section>
+        <section class="glass-card footer-card">
+          <h3 data-i18n="footerLegal">قانوني</h3>
+          <ul>
+            <li><a href="/privacy.html" data-i18n="privacyLink">سياسة الخصوصية</a></li>
+            <li><a href="/terms.html" data-i18n="termsLink">شروط الاستخدام</a></li>
+          </ul>
+        </section>
+      </div>
+    </footer>
+  </div>
+  <script type="module" src="/js/app.js?v=apple-final-20260411-2"></script>
+</body>
+</html>
