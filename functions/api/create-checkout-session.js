@@ -41,7 +41,7 @@ export async function onRequestPost(context) {
           name: 'PhotoForUSA Premium',
           description: 'Premium tools for PhotoForUSA, including background removal and cleaner exports.',
           receipt_button_text: 'Return to PhotoForUSA',
-          receipt_link_url: `${env.PUBLIC_BASE_URL}/success?order_id=[order_id]`,
+         receipt_link_url: `${env.PUBLIC_BASE_URL}/success.html?order_id=[order_id]`,
           receipt_thank_you_note: 'Your Premium access is ready. Return to PhotoForUSA to continue editing.',
           enabled_variants: [Number(env.LEMONSQUEEZY_VARIANT_ID)]
         },
