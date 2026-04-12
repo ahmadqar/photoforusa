@@ -76,16 +76,16 @@ function buildBinaryMask(maskArray, width, height) {
   return binary;
 }
 
-function dilateMask(binary, width, height, radius) {
+function dilateMask(binary, width, height, radiusX, radiusY) {
   const out = new Uint8Array(binary.length);
 
   for (let y = 0; y < height; y += 1) {
     for (let x = 0; x < width; x += 1) {
       let found = 0;
-      for (let dy = -radius; dy <= radius && !found; dy += 1) {
+      for (let dy = -radiusY; dy <= radiusY && !found; dy += 1) {
         const yy = y + dy;
         if (yy < 0 || yy >= height) continue;
-        for (let dx = -radius; dx <= radius; dx += 1) {
+        for (let dx = -radiusX; dx <= radiusX; dx += 1) {
           const xx = x + dx;
           if (xx < 0 || xx >= width) continue;
           if (binary[yy * width + xx]) {
@@ -95,6 +95,32 @@ function dilateMask(binary, width, height, radius) {
         }
       }
       out[y * width + x] = found;
+    }
+  }
+
+  return out;
+}
+
+function closeMask(binary, width, height, radiusX, radiusY) {
+  const dilated = dilateMask(binary, width, height, radiusX, radiusY);
+  const out = new Uint8Array(binary.length);
+
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      let keep = 1;
+      for (let dy = -radiusY; dy <= radiusY && keep; dy += 1) {
+        const yy = y + dy;
+        if (yy < 0 || yy >= height) continue;
+        for (let dx = -radiusX; dx <= radiusX; dx += 1) {
+          const xx = x + dx;
+          if (xx < 0 || xx >= width) continue;
+          if (!dilated[yy * width + xx]) {
+            keep = 0;
+            break;
+          }
+        }
+      }
+      out[y * width + x] = keep;
     }
   }
 
@@ -130,14 +156,23 @@ function buildWhiteBackgroundBlob(sourceCanvas, maskArray) {
   const pixels = source.data;
 
   const binary = buildBinaryMask(maskArray, width, height);
-  const dilationRadius = Math.max(2, Math.round(Math.min(width, height) * 0.006));
-  const featherRadius = Math.max(1, Math.round(Math.min(width, height) * 0.004));
 
-  const dilated = dilateMask(binary, width, height, dilationRadius);
-  const softMask = blurMask(dilated, width, height, featherRadius);
+  const radiusX = Math.max(4, Math.round(Math.min(width, height) * 0.012));
+  const radiusY = Math.max(5, Math.round(Math.min(width, height) * 0.016));
+  const featherRadius = Math.max(2, Math.round(Math.min(width, height) * 0.006));
+
+  const dilated = dilateMask(binary, width, height, radiusX, radiusY);
+  const closed = closeMask(
+    dilated,
+    width,
+    height,
+    Math.max(2, radiusX - 1),
+    Math.max(2, radiusY - 1)
+  );
+  const softMask = blurMask(closed, width, height, featherRadius);
 
   for (let i = 0; i < softMask.length; i += 1) {
-    const alpha = Math.min(1, Math.max(0, softMask[i]));
+    const alpha = Math.min(1, Math.max(0, softMask[i] * 1.10));
     const offset = i * 4;
 
     pixels[offset] = Math.round(pixels[offset] * alpha + 255 * (1 - alpha));
@@ -174,4 +209,3 @@ export async function removeBackgroundLocally(image) {
 
   return buildWhiteBackgroundBlob(canvas, mask);
 }
-
