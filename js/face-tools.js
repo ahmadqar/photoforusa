@@ -71,21 +71,22 @@ export async function detectFace(image, locale = 'en') {
     const faceCenterX = box.originX + box.width / 2;
     const faceCenterY = box.originY + box.height / 2;
 
-    // Make the crop more forgiving so hair and shoulders stay inside the frame.
-    const cropSize = Math.max(
-      box.height / 0.50,
-      box.width / 0.40,
-      Math.min(width, height) * 0.78
-    );
+    // Stronger crop so the head is larger in the final 600x600 image,
+    // while still keeping some room above the hair.
+    const minSide = Math.min(width, height);
+    const targetHeadRatio = 0.61;
+    const cropFromHead = box.height / targetHeadRatio;
+    const cropFromWidth = box.width / 0.52;
+    const cropFromFloor = minSide * 0.60;
 
+    const cropSize = Math.max(cropFromHead, cropFromWidth, cropFromFloor);
     const safeCrop = Math.min(
-      Math.max(cropSize, Math.min(width, height) * 0.55),
-      Math.min(width, height)
+      Math.max(cropSize, minSide * 0.54),
+      minSide
     );
 
     let cropX = faceCenterX - safeCrop / 2;
-    // Move crop upward a little so the top hair has more room.
-    let cropY = faceCenterY - safeCrop * 0.46;
+    let cropY = faceCenterY - safeCrop * 0.50;
 
     cropX = clamp(cropX, 0, width - safeCrop);
     cropY = clamp(cropY, 0, height - safeCrop);
