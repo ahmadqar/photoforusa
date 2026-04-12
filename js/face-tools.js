@@ -10,7 +10,8 @@ async function loadDetector() {
       );
       return vision.FaceDetector.createFromOptions(filesetResolver, {
         baseOptions: {
-          modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/latest/blaze_face_short_range.tflite'
+          modelAssetPath:
+            'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/latest/blaze_face_short_range.tflite'
         },
         runningMode: 'IMAGE'
       });
@@ -53,28 +54,48 @@ export async function detectFace(image, locale = 'en') {
     const result = detector.detect(canvas);
     const detection = result?.detections?.[0];
     if (!detection?.boundingBox) {
-      return fallbackAnalysis(width, height, base, locale, pick(locale, 'No face was detected. A centered crop was suggested instead.', 'لم يتم اكتشاف الوجه بوضوح، لذلك تم اقتراح قص مناسب في المنتصف.'));
+      return fallbackAnalysis(
+        width,
+        height,
+        base,
+        locale,
+        pick(
+          locale,
+          'No face was detected. A centered crop was suggested instead.',
+          'لم يتم اكتشاف الوجه بوضوح، لذلك تم اقتراح قص مناسب في المنتصف.'
+        )
+      );
     }
+
     const box = detection.boundingBox;
     const faceCenterX = box.originX + box.width / 2;
     const faceCenterY = box.originY + box.height / 2;
-    const headRatioTarget = 0.6;
+
+    // Make the crop more forgiving so hair and shoulders stay inside the frame.
     const cropSize = Math.max(
-      box.height / headRatioTarget,
-      box.width / 0.5,
-      Math.min(width, height) * 0.72
+      box.height / 0.50,
+      box.width / 0.40,
+      Math.min(width, height) * 0.78
     );
-    const safeCrop = Math.min(Math.max(cropSize, Math.min(width, height) * 0.45), Math.min(width, height));
+
+    const safeCrop = Math.min(
+      Math.max(cropSize, Math.min(width, height) * 0.55),
+      Math.min(width, height)
+    );
+
     let cropX = faceCenterX - safeCrop / 2;
-    let cropY = faceCenterY - safeCrop * 0.42;
+    // Move crop upward a little so the top hair has more room.
+    let cropY = faceCenterY - safeCrop * 0.46;
+
     cropX = clamp(cropX, 0, width - safeCrop);
     cropY = clamp(cropY, 0, height - safeCrop);
 
     const leftEye = detection.keypoints?.[0];
     const rightEye = detection.keypoints?.[1];
-    const eyeTilt = leftEye && rightEye
-      ? Math.atan2((rightEye.y - leftEye.y), (rightEye.x - leftEye.x)) * (180 / Math.PI)
-      : 0;
+    const eyeTilt =
+      leftEye && rightEye
+        ? Math.atan2(rightEye.y - leftEye.y, rightEye.x - leftEye.x) * (180 / Math.PI)
+        : 0;
     const headRatio = box.height / safeCrop;
 
     return {
@@ -91,11 +112,31 @@ export async function detectFace(image, locale = 'en') {
     };
   } catch (error) {
     console.warn(error);
-    return fallbackAnalysis(width, height, base, locale, pick(locale, 'Face analysis failed. A centered crop was suggested.', 'تعذر إكمال الفحص، لذلك تم اقتراح قص مناسب في المنتصف.'));
+    return fallbackAnalysis(
+      width,
+      height,
+      base,
+      locale,
+      pick(
+        locale,
+        'Face analysis failed. A centered crop was suggested.',
+        'تعذر إكمال الفحص، لذلك تم اقتراح قص مناسب في المنتصف.'
+      )
+    );
   }
 }
 
-function fallbackAnalysis(width, height, base, locale = 'en', message = pick(locale, 'Face detection is unavailable. A centered crop was suggested.', 'خدمة اكتشاف الوجه غير متاحة الآن، لذلك تم اقتراح قص مناسب في المنتصف.')) {
+function fallbackAnalysis(
+  width,
+  height,
+  base,
+  locale = 'en',
+  message = pick(
+    locale,
+    'Face detection is unavailable. A centered crop was suggested.',
+    'خدمة اكتشاف الوجه غير متاحة الآن، لذلك تم اقتراح قص مناسب في المنتصف.'
+  )
+) {
   const size = Math.min(width, height);
   return {
     message,
@@ -126,30 +167,45 @@ export function buildComplianceChecks(analysis, image, file, locale = 'en') {
 
   items.push({
     state: sourceWidth >= 600 && sourceHeight >= 600 ? 'pass' : 'warn',
-    label: sourceWidth >= 600 && sourceHeight >= 600
-      ? pick(locale, `Source image is at least 600 px on both sides (${sourceWidth}×${sourceHeight}).`, `أبعاد الصورة الأصلية مناسبة للفحص (${sourceWidth}×${sourceHeight}).`)
-      : pick(locale, `Source image is smaller than ideal (${sourceWidth}×${sourceHeight}); export quality may be limited.`, `أبعاد الصورة الأصلية أصغر من المطلوب المثالي (${sourceWidth}×${sourceHeight}).`)
+    label:
+      sourceWidth >= 600 && sourceHeight >= 600
+        ? pick(
+            locale,
+            `Source image is at least 600 px on both sides (${sourceWidth}×${sourceHeight}).`,
+            `أبعاد الصورة الأصلية مناسبة للفحص (${sourceWidth}×${sourceHeight}).`
+          )
+        : pick(
+            locale,
+            `Source image is smaller than ideal (${sourceWidth}×${sourceHeight}); export quality may be limited.`,
+            `أبعاد الصورة الأصلية أصغر من المطلوب المثالي (${sourceWidth}×${sourceHeight}).`
+          )
   });
 
   items.push({
     state: fileSize <= 8 * 1024 * 1024 ? 'pass' : 'warn',
-    label: fileSize <= 8 * 1024 * 1024
-      ? pick(locale, 'Uploaded file size is suitable for browser processing.', 'حجم الملف مناسب للمعالجة داخل المتصفح.')
-      : pick(locale, 'Uploaded file is large; browser processing may be slower.', 'حجم الملف كبير وقد يجعل المعالجة أبطأ.')
+    label:
+      fileSize <= 8 * 1024 * 1024
+        ? pick(locale, 'Uploaded file size is suitable for browser processing.', 'حجم الملف مناسب للمعالجة داخل المتصفح.')
+        : pick(locale, 'Uploaded file is large; browser processing may be slower.', 'حجم الملف كبير وقد يجعل المعالجة أبطأ.')
   });
 
   items.push({
     state: headRatio >= 0.5 && headRatio <= 0.69 ? 'pass' : 'warn',
     label: headRatio
-      ? pick(locale, `Estimated head height in crop is ${(headRatio * 100).toFixed(1)}%. Target guidance is roughly 50%–69%.`, `تقدير حجم الرأس داخل القص هو ${(headRatio * 100).toFixed(1)}%، والهدف التقريبي بين 50% و69%.`)
+      ? pick(
+          locale,
+          `Estimated head height in crop is ${(headRatio * 100).toFixed(1)}%. Target guidance is roughly 50%–69%.`,
+          `تقدير حجم الرأس داخل القص هو ${(headRatio * 100).toFixed(1)}%، والهدف التقريبي بين 50% و69%.`
+        )
       : pick(locale, 'Head height could not be estimated. Manual review is recommended.', 'تعذر تقدير حجم الرأس، ويُنصح بالمراجعة اليدوية.')
   });
 
   items.push({
     state: eyeTilt <= 8 ? 'pass' : 'warn',
-    label: eyeTilt <= 8
-      ? pick(locale, `Face alignment looks reasonably straight (tilt ${eyeTilt.toFixed(1)}°).`, `استقامة الوجه تبدو جيدة (${eyeTilt.toFixed(1)}°).`)
-      : pick(locale, `The face may be tilted (${eyeTilt.toFixed(1)}°). Consider a straighter photo.`, `قد يكون الوجه مائلًا (${eyeTilt.toFixed(1)}°)، ويُفضّل صورة أكثر استقامة.`)
+    label:
+      eyeTilt <= 8
+        ? pick(locale, `Face alignment looks reasonably straight (tilt ${eyeTilt.toFixed(1)}°).`, `استقامة الوجه تبدو جيدة (${eyeTilt.toFixed(1)}°).`)
+        : pick(locale, `The face may be tilted (${eyeTilt.toFixed(1)}°). Consider a straighter photo.`, `قد يكون الوجه مائلًا (${eyeTilt.toFixed(1)}°)، ويُفضّل صورة أكثر استقامة.`)
   });
 
   items.push({
