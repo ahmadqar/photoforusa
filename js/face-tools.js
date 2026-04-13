@@ -1,3 +1,4 @@
+
 let detectorPromise = null;
 
 async function loadDetector() {
@@ -36,6 +37,37 @@ function pick(locale, en, ar) {
   return locale === 'ar' ? ar : en;
 }
 
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function buildCropFromFace(box, width, height) {
+  const faceCenterX = box.originX + box.width / 2;
+  const faceCenterY = box.originY + box.height / 2;
+
+  // Tighter than the previous version so the head becomes larger inside the frame,
+  // but still generous enough to preserve top hair and shoulders.
+  const targetHeadRatio = 0.60;
+
+  const cropFromHead = box.height / targetHeadRatio;
+  const cropFromWidth = box.width / 0.48;
+  const cropFromImage = Math.min(width, height) * 0.62;
+
+  let safeCrop = Math.max(cropFromHead, cropFromWidth, cropFromImage);
+  safeCrop = Math.min(Math.max(safeCrop, Math.min(width, height) * 0.52), Math.min(width, height));
+
+  let cropX = faceCenterX - safeCrop / 2;
+
+  // Position the face slightly higher than center, but not too high,
+  // to leave room for hair while reducing the empty area above the head.
+  let cropY = faceCenterY - safeCrop * 0.39;
+
+  cropX = clamp(cropX, 0, width - safeCrop);
+  cropY = clamp(cropY, 0, height - safeCrop);
+
+  return { x: cropX, y: cropY, size: safeCrop };
+}
+
 export async function detectFace(image, locale = 'en') {
   const width = image.naturalWidth || image.width;
   const height = image.naturalHeight || image.height;
@@ -53,6 +85,7 @@ export async function detectFace(image, locale = 'en') {
     const canvas = drawImageToCanvas(image);
     const result = detector.detect(canvas);
     const detection = result?.detections?.[0];
+
     if (!detection?.boundingBox) {
       return fallbackAnalysis(
         width,
@@ -68,28 +101,7 @@ export async function detectFace(image, locale = 'en') {
     }
 
     const box = detection.boundingBox;
-    const faceCenterX = box.originX + box.width / 2;
-    const faceCenterY = box.originY + box.height / 2;
-
-    // Stronger crop so the head is larger in the final 600x600 image,
-    // while still keeping some room above the hair.
-    const minSide = Math.min(width, height);
-    const targetHeadRatio = 0.61;
-    const cropFromHead = box.height / targetHeadRatio;
-    const cropFromWidth = box.width / 0.52;
-    const cropFromFloor = minSide * 0.60;
-
-    const cropSize = Math.max(cropFromHead, cropFromWidth, cropFromFloor);
-    const safeCrop = Math.min(
-      Math.max(cropSize, minSide * 0.54),
-      minSide
-    );
-
-    let cropX = faceCenterX - safeCrop / 2;
-    let cropY = faceCenterY - safeCrop * 0.50;
-
-    cropX = clamp(cropX, 0, width - safeCrop);
-    cropY = clamp(cropY, 0, height - safeCrop);
+    const crop = buildCropFromFace(box, width, height);
 
     const leftEye = detection.keypoints?.[0];
     const rightEye = detection.keypoints?.[1];
@@ -97,11 +109,12 @@ export async function detectFace(image, locale = 'en') {
       leftEye && rightEye
         ? Math.atan2(rightEye.y - leftEye.y, rightEye.x - leftEye.x) * (180 / Math.PI)
         : 0;
-    const headRatio = box.height / safeCrop;
+
+    const headRatio = box.height / crop.size;
 
     return {
       message: pick(locale, 'Face detected successfully.', 'تم اكتشاف الوجه بنجاح.'),
-      crop: { x: cropX, y: cropY, size: safeCrop },
+      crop,
       diagnostics: {
         width,
         height,
@@ -138,7 +151,7 @@ function fallbackAnalysis(
     'خدمة اكتشاف الوجه غير متاحة الآن، لذلك تم اقتراح قص مناسب في المنتصف.'
   )
 ) {
-  const size = Math.min(width, height);
+  const size = Math.min(width, height) * 0.92;
   return {
     message,
     crop: {
@@ -215,8 +228,4 @@ export function buildComplianceChecks(analysis, image, file, locale = 'en') {
   });
 
   return items;
-}
-
-function clamp(value, min, max) {
-  return Math.min(Math.max(value, min), max);
 }
