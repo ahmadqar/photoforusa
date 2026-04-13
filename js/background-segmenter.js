@@ -76,16 +76,16 @@ function buildBinaryMask(maskArray, width, height) {
   return binary;
 }
 
-function dilateMask(binary, width, height, radiusX, radiusY) {
+function dilateMask(binary, width, height, radius) {
   const out = new Uint8Array(binary.length);
 
   for (let y = 0; y < height; y += 1) {
     for (let x = 0; x < width; x += 1) {
       let found = 0;
-      for (let dy = -radiusY; dy <= radiusY && !found; dy += 1) {
+      for (let dy = -radius; dy <= radius && !found; dy += 1) {
         const yy = y + dy;
         if (yy < 0 || yy >= height) continue;
-        for (let dx = -radiusX; dx <= radiusX; dx += 1) {
+        for (let dx = -radius; dx <= radius; dx += 1) {
           const xx = x + dx;
           if (xx < 0 || xx >= width) continue;
           if (binary[yy * width + xx]) {
@@ -95,32 +95,6 @@ function dilateMask(binary, width, height, radiusX, radiusY) {
         }
       }
       out[y * width + x] = found;
-    }
-  }
-
-  return out;
-}
-
-function closeMask(binary, width, height, radiusX, radiusY) {
-  const dilated = dilateMask(binary, width, height, radiusX, radiusY);
-  const out = new Uint8Array(binary.length);
-
-  for (let y = 0; y < height; y += 1) {
-    for (let x = 0; x < width; x += 1) {
-      let keep = 1;
-      for (let dy = -radiusY; dy <= radiusY && keep; dy += 1) {
-        const yy = y + dy;
-        if (yy < 0 || yy >= height) continue;
-        for (let dx = -radiusX; dx <= radiusX; dx += 1) {
-          const xx = x + dx;
-          if (xx < 0 || xx >= width) continue;
-          if (!dilated[yy * width + xx]) {
-            keep = 0;
-            break;
-          }
-        }
-      }
-      out[y * width + x] = keep;
     }
   }
 
@@ -156,23 +130,14 @@ function buildWhiteBackgroundBlob(sourceCanvas, maskArray) {
   const pixels = source.data;
 
   const binary = buildBinaryMask(maskArray, width, height);
+  const dilationRadius = Math.max(2, Math.round(Math.min(width, height) * 0.006));
+  const featherRadius = Math.max(1, Math.round(Math.min(width, height) * 0.004));
 
-  const radiusX = Math.max(4, Math.round(Math.min(width, height) * 0.012));
-  const radiusY = Math.max(5, Math.round(Math.min(width, height) * 0.016));
-  const featherRadius = Math.max(2, Math.round(Math.min(width, height) * 0.006));
-
-  const dilated = dilateMask(binary, width, height, radiusX, radiusY);
-  const closed = closeMask(
-    dilated,
-    width,
-    height,
-    Math.max(2, radiusX - 1),
-    Math.max(2, radiusY - 1)
-  );
-  const softMask = blurMask(closed, width, height, featherRadius);
+  const dilated = dilateMask(binary, width, height, dilationRadius);
+  const softMask = blurMask(dilated, width, height, featherRadius);
 
   for (let i = 0; i < softMask.length; i += 1) {
-    const alpha = Math.min(1, Math.max(0, softMask[i] * 1.10));
+    const alpha = Math.min(1, Math.max(0, softMask[i]));
     const offset = i * 4;
 
     pixels[offset] = Math.round(pixels[offset] * alpha + 255 * (1 - alpha));
@@ -208,4 +173,79 @@ export async function removeBackgroundLocally(image) {
   }
 
   return buildWhiteBackgroundBlob(canvas, mask);
+}
+
+
+export async function detectWhiteBackground(image) {
+  const canvas = imageToCanvas(image);
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  const { width, height } = canvas;
+  const data = ctx.getImageData(0, 0, width, height).data;
+
+  const samplePoints = [];
+  const marginX = Math.max(8, Math.floor(width * 0.06));
+  const marginY = Math.max(8, Math.floor(height * 0.06));
+
+  function pushSample(x, y) {
+    const i = (y * width + x) * 4;
+    samplePoints.push({
+      r: data[i],
+      g: data[i + 1],
+      b: data[i + 2]
+    });
+  }
+
+  for (let x = marginX; x < width - marginX; x += Math.max(6, Math.floor(width / 40))) {
+    pushSample(x, marginY);
+    pushSample(x, height - marginY - 1);
+  }
+
+  for (let y = marginY; y < height - marginY; y += Math.max(6, Math.floor(height / 40))) {
+    pushSample(marginX, y);
+    pushSample(width - marginX - 1, y);
+  }
+
+  pushSample(marginX, marginY);
+  pushSample(width - marginX - 1, marginY);
+  pushSample(marginX, height - marginY - 1);
+  pushSample(width - marginX - 1, height - marginY - 1);
+
+  const brightness = samplePoints.map((p) => (p.r + p.g + p.b) / 3);
+  const avg = brightness.reduce((a, b) => a + b, 0) / brightness.length;
+
+  const variance =
+    brightness.reduce((sum, v) => sum + Math.pow(v - avg, 2), 0) / brightness.length;
+
+  const maxChannelGap = samplePoints.reduce((max, p) => {
+    const gap = Math.max(
+      Math.abs(p.r - p.g),
+      Math.abs(p.r - p.b),
+      Math.abs(p.g - p.b)
+    );
+    return Math.max(max, gap);
+  }, 0);
+
+  const whiteLikeRatio =
+    samplePoints.filter((p) => {
+      const mean = (p.r + p.g + p.b) / 3;
+      const nearWhite = mean >= 232;
+      const lowTint =
+        Math.abs(p.r - p.g) < 16 &&
+        Math.abs(p.r - p.b) < 16 &&
+        Math.abs(p.g - p.b) < 16;
+      return nearWhite && lowTint;
+    }).length / samplePoints.length;
+
+  const isWhiteUniform =
+    avg >= 236 &&
+    variance < 160 &&
+    maxChannelGap < 18 &&
+    whiteLikeRatio >= 0.82;
+
+  return {
+    isWhiteUniform,
+    avgBrightness: avg,
+    variance,
+    whiteLikeRatio
+  };
 }
